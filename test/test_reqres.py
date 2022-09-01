@@ -1,7 +1,7 @@
 from faker import Faker
 from pytest_voluptuous import S
 
-from data.data import user_data, CREATED, user_register, SUCCESSFUL, DELETED, register, create
+from data.data import user_data, CREATED, user_register, SUCCESSFUL, register, create
 from utils.sessions import reqres
 
 faker = Faker()
@@ -18,17 +18,17 @@ def test_get_single_user():
     assert S(register) == response.json()
 
 
-def test_delete_user():
-    response = reqres().delete('/api/users/1')
-    assert response.status_code == DELETED, f'Status code should be {DELETED}'
+def test_single_user_not_found():
+    response = reqres().get('/api/users/23')
+    assert response.status_code == 404
 
 
 def test_create_new_user():
     name = faker.first_name()
     job = faker.job()
-    data = user_data(name, job)
+    payload = user_data(name, job)
 
-    response = reqres().post('/api/users', data=data)
+    response = reqres().post('/api/users', data=payload)
     assert response.status_code == CREATED, f'Status code should be {CREATED}'
     assert response.json()['name'] == name, f'Name should be equal {name}'
     assert response.json()['job'] == job, f'Job should be equal {job}'
@@ -38,10 +38,19 @@ def test_create_new_user():
 def test_register_successful():
     email = "eve.holt@reqres.in"
     password = "pistol"
-    data = user_register(email, password)
-    response = reqres().post('/api/register', data=data)
+    payload = user_register(email, password)
+    response = reqres().post('/api/register', data=payload)
 
     assert response.status_code == SUCCESSFUL, f'Status code should be {SUCCESSFUL}'
     assert response.json()['id'] == 4
     assert response.json()['token'] == "QpwL5tke4Pnpja7X4"
     assert S(register) == response.json()
+
+
+def test_update_user():
+    name = "morpheus"
+    job = "zion resident"
+    payload = user_data(name, job)
+    response = reqres().put('/api/users/2', data=payload)
+
+    assert response.status_code == SUCCESSFUL, f'Status code should be {SUCCESSFUL}'
