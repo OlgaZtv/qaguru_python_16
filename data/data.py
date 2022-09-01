@@ -1,6 +1,5 @@
 from voluptuous import Schema, ALLOW_EXTRA
 
-DELETED = 204
 CREATED = 201
 SUCCESSFUL = 200
 
